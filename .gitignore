@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+# generated benchmark + rollout outputs
+.elt_rl/
+runs/
+*.duckdb
+*.duckdb.wal
+# credentials never belong in the repo
+*_credential.json
+.env

@@ -1,0 +1,29 @@
+# Network egress control for rollout containers on the official backend.
+#
+#   docker compose -f docker/egress/docker-compose.yml up -d
+#   # let the internal network reach Airbyte and the source systems
+#   for c in airbyte-abctl-control-plane elt-postgres elt-mongodb elt-localstack elt-api; do
+#     docker network connect elt-rl-internal "$c"
+#   done
+#
+# then run with:  network=elt-rl-internal egress_proxy=http://elt-egress:3128
+#
+# `elt-rl-internal` has no route to the outside (internal: true). The proxy is
+# attached to it and to a normal bridge, and forwards only allow-listed hosts.
+services:
+  egress:
+    image: ubuntu/squid:latest
+    container_name: elt-egress
+    restart: unless-stopped
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro
+    networks:
+      - internal
+      - outside
+
+networks:
+  internal:
+    name: elt-rl-internal
+    internal: true
+  outside:
+    driver: bridge

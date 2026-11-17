@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "elt-rl"
+version = "0.1.0"
+description = "Tinker RLVR recipe for ELT-Bench: end-to-end ELT pipeline environments with execution-verified rewards"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "tinker_cookbook @ git+https://github.com/thinking-machines-lab/tinker-cookbook.git",
+    "chz>=0.4.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "pyyaml>=6.0",
+    # Credential-free local destination and its dbt adapter.
+    "duckdb>=1.1.0",
+    "dbt-core>=1.8.0",
+    "dbt-duckdb>=1.8.0",
+]
+
+[project.optional-dependencies]
+# Official ELT-Bench destination (credentialed runs).
+snowflake = ["snowflake-connector-python>=3.10.0"]
+dev = ["pytest>=8.0.0", "pytest-asyncio>=0.23.0", "ruff>=0.4.0"]
+
+[project.scripts]
+# Local stand-in for Airbyte + Terraform, used by the credential-free tasks.
+minielt = "elt_rl.minielt.cli:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["elt_rl"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = [
+    "docker: needs a running Docker daemon",
+    "snowflake: needs Snowflake credentials and the ELT-Bench stack",
+    "tinker: needs TINKER_API_KEY",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]  # long strings (prompts, SQL) are kept on one line
